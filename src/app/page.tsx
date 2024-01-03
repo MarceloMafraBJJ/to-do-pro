@@ -1,113 +1,232 @@
-import Image from 'next/image'
+import {
+  GetLastReminders,
+  GetMonthlyReminders,
+  GetTodayReminders,
+} from "@/actions/reminder";
+import Title from "@/components/title";
+import ReminderItem from "@/components/reminder-item";
+import { Separator } from "@/components/ui/separator";
 
-export default function Home() {
+import { Skeleton } from "@/components/ui/skeleton";
+import { Suspense } from "react";
+import Subtitle from "@/components/subtitle ";
+
+import CompletedRemindersCard from "@/components/completed-reminders-card";
+import { Reminder } from "@prisma/client";
+import FrequencyItemsWrapper from "@/components/frequency-items-wrapper";
+
+const Home = () => {
+  function getFormattedDateWithDayOfWeek() {
+    const currentDate = new Date();
+
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    };
+
+    const formattedDate: string = currentDate.toLocaleDateString(
+      "en-US",
+      options,
+    );
+
+    return formattedDate;
+  }
+
+  const formattedDateWithDayOfWeek = getFormattedDateWithDayOfWeek();
+
+  const DEFAULT_SKELETONS = new Array(3).fill(null);
+  const DEFAULT_SKELETONS_FREQUENCY = new Array(5).fill(null);
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <main className="container w-full space-y-12 pb-10">
+      <div className="flex flex-col gap-6">
+        <Title>{formattedDateWithDayOfWeek}</Title>
+
+        <Separator />
+
+        <div className="flex flex-col gap-10 rounded p-4 lg:grid lg:grid-cols-3">
+          <Suspense
+            fallback={DEFAULT_SKELETONS.map((_, index) => (
+              <SkeletonReminderItem key={index} />
+            ))}
           >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+            <ReminderItems />
+          </Suspense>
+        </div>
+
+        <Separator />
+      </div>
+
+      <div className="flex flex-col gap-6">
+        <div className="flex items-end gap-1">
+          <Subtitle>Statistics</Subtitle>
+          <span className="pb-0.5 text-xs text-muted-foreground">/ Month</span>
+        </div>
+
+        <div className="flex flex-col gap-10 lg:grid lg:grid-cols-3">
+          <Suspense
+            fallback={DEFAULT_SKELETONS.map((_, index) => (
+              <Skeleton
+                className="h-full w-full lg:h-[250px] lg:w-[400px]"
+                key={index}
+              />
+            ))}
+          >
+            <StatCardItems />
+          </Suspense>
         </div>
       </div>
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+      <div className="flex flex-col gap-6">
+        <div className="flex items-end gap-1">
+          <Subtitle>Frequency</Subtitle>
+          <span className="pb-0.5 text-xs text-muted-foreground">
+            / Last 5 days
+          </span>
+        </div>
 
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
+        <div>
+          <Suspense
+            fallback={DEFAULT_SKELETONS_FREQUENCY.map((_, index) => (
+              <Skeleton
+                className="h-full w-full lg:h-[50px] lg:w-[50px]"
+                key={index}
+              />
+            ))}
+          >
+            <FrequencyItems />
+          </Suspense>
+        </div>
       </div>
     </main>
-  )
+  );
+};
+
+async function ReminderItems() {
+  const reminders = await GetTodayReminders();
+
+  if (!reminders || reminders?.length === 0) {
+    return (
+      <p className="text-muted-foreground">
+        No reminders found yet. Create them.
+      </p>
+    );
+  }
+
+  return reminders?.map((reminder) => <ReminderItem reminder={reminder} />);
 }
+
+function SkeletonReminderItem() {
+  return (
+    <div className="flex h-full w-full justify-between gap-10">
+      <div className="flex w-full gap-3">
+        <Skeleton className="h-5 w-5" />
+
+        <div className="flex w-full flex-col gap-4 lg:w-[450px]">
+          <Skeleton className="h-4" />
+          <Skeleton className="h-3" />
+        </div>
+      </div>
+
+      <Skeleton className="h-5 w-5" />
+    </div>
+  );
+}
+
+async function StatCardItems() {
+  const todayReminders = await GetTodayReminders();
+  const monthlyReminders = await GetMonthlyReminders();
+
+  function calculatePercentage(reminders: Reminder[] | undefined) {
+    if (!reminders || reminders.length === 0) return;
+
+    const completedReminders = reminders.filter(
+      ({ completed }) => completed === true,
+    );
+
+    const completedRemindersPercentage =
+      (completedReminders.length / reminders.length) * 100;
+
+    return {
+      percentage: completedRemindersPercentage,
+      completed: completedReminders.length,
+      total: reminders.length,
+    };
+  }
+
+  const getTodayPercentage = calculatePercentage(todayReminders);
+  const getMonthlyPercentage = calculatePercentage(monthlyReminders);
+
+  return (
+    <>
+      <CompletedRemindersCard
+        completedRemindersStats={getTodayPercentage}
+        title="Today"
+        description="Today's percentage"
+      />
+
+      <CompletedRemindersCard
+        completedRemindersStats={getMonthlyPercentage}
+        title="Monthly"
+        description="Percentage this month."
+      />
+    </>
+  );
+}
+
+async function FrequencyItems() {
+  const reminders = await GetLastReminders();
+
+  if (!reminders || reminders.length === 0) {
+    return null;
+  }
+
+  const remindersByDay: Record<string, Reminder[]> = {};
+
+  reminders.forEach((reminder) => {
+    const date = reminder?.initialDeadline || reminder?.deadline;
+    const reminderDate = new Date(date!);
+
+    const formattedDate = new Date(
+      reminderDate.getFullYear(),
+      reminderDate.getMonth(),
+      reminderDate.getDate(),
+    )
+      .toISOString()
+      .split("T")[0]; // Use only the date part
+
+    if (!remindersByDay[formattedDate]) {
+      remindersByDay[formattedDate] = [];
+    }
+
+    remindersByDay[formattedDate].push(reminder);
+  });
+
+  const sortedReminders = Object.entries(remindersByDay)
+    .sort(
+      ([dateA], [dateB]) =>
+        new Date(dateA).getTime() - new Date(dateB).getTime(),
+    )
+    .map(([day, dayReminders]) => {
+      const completedReminders = dayReminders.filter(
+        ({ completed }) => completed,
+      );
+
+      const percentage =
+        (completedReminders.length / dayReminders.length) * 100;
+
+      return {
+        day,
+        percentage: percentage.toFixed(2),
+        completedReminders: completedReminders.length,
+        totalReminders: dayReminders.length,
+        reminders: dayReminders,
+      };
+    });
+
+  return <FrequencyItemsWrapper reminders={sortedReminders} />;
+}
+
+export default Home;

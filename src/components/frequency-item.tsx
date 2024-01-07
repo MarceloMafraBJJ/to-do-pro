@@ -29,6 +29,7 @@ const FrequencyItem = ({
 }: FrequencyItemProps) => {
   const weekday = new Intl.DateTimeFormat("en-US", {
     weekday: "long",
+    timeZone: "UTC",
   }).format(new Date(day));
 
   const percentage = Number(stringPercentage);

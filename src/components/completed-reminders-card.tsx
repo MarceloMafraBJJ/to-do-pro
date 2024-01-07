@@ -48,11 +48,11 @@ const CompletedRemindersCard = ({
         </div>
       </CardContent>
 
-      <Separator />
+      {/*  <Separator />
 
       <CardFooter className="p-2 px-6">
         <Button variant={"ghost"}>See more</Button>
-      </CardFooter>
+      </CardFooter> */}
     </Card>
   );
 };

@@ -78,11 +78,10 @@ async function GetTodayReminders() {
         userId: user.id,
         OR: [
           {
-            initialDeadline: { gte: startOfCurrentDay, lt: currentDate },
+            initialDeadline: { lte: currentDate },
+            deadline: { gte: currentDate },
           },
-          {
-            deadline: { gte: startOfCurrentDay },
-          },
+          { deadline: null },
         ],
       },
       orderBy: { createdAt: "asc" },
@@ -171,10 +170,29 @@ async function GetLastReminders() {
   }
 }
 
+async function DeleteReminder({ reminderId: id }: { reminderId: string }) {
+  const user = await currentUser();
+  if (!user) throw new Error("User not found");
+
+  try {
+    const reminders = await prisma.reminder.delete({
+      where: {
+        userId: user.id,
+        id,
+      },
+    });
+
+    return reminders;
+  } catch (error) {
+    console.error("Something went wrong while deleting reminders. ", error);
+  }
+}
+
 export {
   CreateReminder,
   UpdateReminder,
   GetTodayReminders,
   GetMonthlyReminders,
   GetLastReminders,
+  DeleteReminder,
 };

@@ -1,7 +1,7 @@
 "use client";
 
 import { ChangeEvent, Dispatch, HTMLAttributes, useState } from "react";
-import { format, parse } from "date-fns";
+import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { DateRange } from "react-day-picker";
 
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/popover";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import { FormatDate, FormatTime } from "@/lib/format-date";
 
 export interface DateAndTimeProps extends DateRange {
   time: string;
@@ -23,15 +24,22 @@ export interface DateAndTimeProps extends DateRange {
 const DateAndTimePickerWithRange = ({
   className,
   setDate,
+  date,
+  placeholder,
 }: {
   className?: HTMLAttributes<HTMLDivElement>;
   setDate: Dispatch<DateAndTimeProps>;
+  date?: DateAndTimeProps;
+  placeholder?: string | null;
 }) => {
   const currentDate = new Date();
 
-  const [selectedDate, setSelectedDate] = useState<DateRange | undefined>();
+  const [selectedDate, setSelectedDate] = useState<DateRange | undefined>({
+    from: date?.from,
+    to: date?.to,
+  });
   const [selectedTime, setSelectedTime] = useState<string>(
-    format(currentDate, "HH:mm"),
+    date?.time || format(currentDate, "HH:mm"),
   );
 
   let initialDate = selectedDate?.from;
@@ -80,12 +88,11 @@ const DateAndTimePickerWithRange = ({
     </div>
   );
 
-  const SELECTED_START_DATE = initialDate && format(initialDate, "LLL dd");
+  const SELECTED_START_DATE = initialDate && FormatDate(initialDate);
 
-  const SELECTED_END_DATE = finalDate && format(finalDate, "LLL dd");
+  const SELECTED_END_DATE = finalDate && FormatDate(finalDate);
 
-  const SELECTED_TIME =
-    selectedTime && format(parse(selectedTime, "HH:mm", new Date()), "HH:mm");
+  const SELECTED_TIME = selectedTime && FormatTime(selectedTime);
 
   return (
     <div className={cn("grid gap-2", className)}>
@@ -111,7 +118,7 @@ const DateAndTimePickerWithRange = ({
                 </p>
               )
             ) : (
-              <span>Pick a date</span>
+              <span>{placeholder || "Pick a date"}</span>
             )}
           </Button>
         </PopoverTrigger>

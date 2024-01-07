@@ -31,6 +31,15 @@ const DrawerDialog = ({
 }) => {
   const [open, setOpen] = React.useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  const isEditing = !!reminder;
+
+  const DIALOG_TITLE = isEditing
+    ? "Edit your reminder, or something else."
+    : "Create a reminder, or something else.";
+
+  const DIALOG_DESCRIPTION = isEditing
+    ? "You can edit your reminder right here."
+    : "You can create some reminders right here.";
 
   if (isDesktop) {
     return (
@@ -53,13 +62,11 @@ const DrawerDialog = ({
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Create a reminder, or something else.</DialogTitle>
-            <DialogDescription>
-              You can create some reminders right here.
-            </DialogDescription>
+            <DialogTitle>{DIALOG_TITLE}</DialogTitle>
+            <DialogDescription>{DIALOG_DESCRIPTION}</DialogDescription>
           </DialogHeader>
 
-          <ReminderForm setOpenDialog={setOpen} />
+          <ReminderForm setOpenDialog={setOpen} reminder={reminder} />
         </DialogContent>
       </Dialog>
     );
@@ -85,10 +92,8 @@ const DrawerDialog = ({
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader className="text-left">
-          <DrawerTitle>Create a reminder, or something else.</DrawerTitle>
-          <DrawerDescription>
-            You can create some reminders right here.
-          </DrawerDescription>
+          <DrawerTitle>{DIALOG_TITLE}</DrawerTitle>
+          <DrawerDescription>{DIALOG_DESCRIPTION}</DrawerDescription>
         </DrawerHeader>
 
         <ReminderForm

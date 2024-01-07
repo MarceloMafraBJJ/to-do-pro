@@ -32,16 +32,21 @@ import DateAndTimePickerWithRange, {
 import { Label } from "./ui/label";
 import { useState } from "react";
 import { toast } from "sonner";
-import { CreateReminder } from "@/actions/reminder";
+import {
+  CreateReminder,
+  DeleteReminder,
+  UpdateReminder,
+} from "@/actions/reminder";
 import { useUser } from "@clerk/nextjs";
 import LoadingSpinner from "./LoadingSpinner";
 import { useRouter } from "next/navigation";
 import { Reminder } from "@prisma/client";
+import { FormatDate, FormatTime } from "@/lib/format-date";
 
 const formSchema = z.object({
   title: z.string().min(2).optional().or(z.literal("")),
   description: z.string().min(2).max(250),
-  type: z.string(),
+  type: z.string().optional().or(z.literal("")),
   completed: z.boolean().default(false),
   initialDeadline: z.date().nullish(),
   deadline: z.date().nullish(),
@@ -74,31 +79,67 @@ const ReminderForm = ({
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    values: {
+    defaultValues: {
       title: reminder?.title || "",
-      description: reminder?.description || "",
-      type: reminder?.type || "aqui",
-      completed: reminder?.completed || false,
+      description: reminder?.description,
+      completed: reminder?.completed,
       time: reminder?.time || "",
       initialDeadline: reminder?.initialDeadline,
       deadline: reminder?.deadline,
     },
   });
 
+  const isEditing = !!reminder;
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!user) return;
+    if (!user || error) return;
+
+    let reminderData = {
+      ...values,
+      type: "",
+      userId: user?.id,
+    };
 
     try {
       setIsLoading(true);
-      const reminderData = { ...values, userId: user?.id };
-      await CreateReminder({ reminderData });
 
-      toast.success("The reminder was created successfully.");
+      if (isEditing) {
+        await UpdateReminder({ reminderData, reminderId: reminder.id });
+        toast.success("The reminder was updated successfully.");
+      } else {
+        if (!form.getValues("type")) {
+          return form.setError("type", { message: "Type is required." });
+        }
+
+        reminderData.type = form.getValues("type") as string;
+
+        await CreateReminder({ reminderData });
+
+        toast.success("The reminder was created successfully.");
+      }
 
       router.refresh();
       return setOpenDialog(false);
     } catch (error) {
       toast.error("The reminder cannot be created.");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function HandleDeleteReminder() {
+    if (!reminder) return;
+
+    try {
+      setIsLoading(true);
+
+      await DeleteReminder({ reminderId: reminder?.id });
+      toast.error("The reminder was deleted successfully.");
+
+      router.refresh();
+      return setOpenDialog(false);
+    } catch (error) {
+      toast.error("The reminder cannot be deleted.");
     } finally {
       setIsLoading(false);
     }
@@ -146,7 +187,25 @@ const ReminderForm = ({
     };
   }
 
-  console.log(reminder?.type);
+  const START_DATE = reminder && FormatDate(reminder?.initialDeadline);
+
+  const END_DATE = reminder && FormatDate(reminder?.deadline);
+
+  const TIME = reminder && FormatTime(reminder?.time);
+
+  const EDIT_CALENDAR_PLACEHOLDER =
+    reminder?.initialDeadline &&
+    (reminder?.deadline
+      ? `${START_DATE} - ${END_DATE}, at ${TIME}.`
+      : `${START_DATE}, at ${TIME}.`);
+
+  const dateAndTimeData = {
+    from: reminder?.initialDeadline
+      ? new Date(reminder?.initialDeadline)
+      : null,
+    to: reminder?.deadline ? new Date(reminder?.deadline) : null,
+    time: reminder?.time!,
+  };
 
   return (
     <Form {...form}>
@@ -189,12 +248,15 @@ const ReminderForm = ({
           name="type"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Type</FormLabel>
+              <FormLabel>Type </FormLabel>
               <FormControl>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <SelectTrigger>
-                    <SelectValue placeholder={"Select a type"} />
+                    <SelectValue
+                      placeholder={reminder?.type || "Select a type"}
+                    />
                   </SelectTrigger>
+
                   <SelectContent>
                     <SelectGroup>
                       <SelectLabel>Types</SelectLabel>
@@ -218,6 +280,8 @@ const ReminderForm = ({
 
           <DateAndTimePickerWithRange
             setDate={(date) => setDateEndTimeStates(date)}
+            placeholder={EDIT_CALENDAR_PLACEHOLDER}
+            date={dateAndTimeData as DateAndTimeProps}
           />
 
           {error && (
@@ -235,8 +299,21 @@ const ReminderForm = ({
           }}
           disabled={isLoading}
         >
-          {isLoading ? <LoadingSpinner /> : "Create"}
+          {isLoading ? <LoadingSpinner /> : isEditing ? "Edit" : "Create"}
         </Button>
+
+        {isEditing && (
+          <div className="flex w-full justify-end">
+            <Button
+              variant={"ghost"}
+              size={"sm"}
+              onClick={HandleDeleteReminder}
+              type="button"
+            >
+              Delete reminder
+            </Button>
+          </div>
+        )}
       </form>
     </Form>
   );

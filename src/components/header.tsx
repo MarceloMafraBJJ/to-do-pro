@@ -5,9 +5,28 @@ import { Skeleton } from "./ui/skeleton";
 import { ToggleTheme } from "./toggle-theme";
 import SliderMarquee from "./slider-marquee";
 import DrawerDialog from "./drawer-dialog";
+import { useEffect } from "react";
 
 const Header = () => {
   const { user, isLoaded } = useUser();
+
+  useEffect(() => {
+    if (Notification.permission !== "granted") {
+      Notification.requestPermission().then((permission) => {
+        if (permission === "granted") {
+          showNotification("Welcome!", "You're ready to start.");
+        }
+      });
+    }
+  }, []);
+
+  const showNotification = (title: string, body: string) => {
+    if (Notification.permission === "granted") {
+      new Notification(title, {
+        body,
+      });
+    }
+  };
 
   return (
     <header className="flex flex-col pb-5 pt-10 md:pb-8 md:pt-12">

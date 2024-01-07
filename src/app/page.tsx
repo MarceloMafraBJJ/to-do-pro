@@ -115,7 +115,9 @@ async function ReminderItems() {
     );
   }
 
-  return reminders?.map((reminder) => <ReminderItem reminder={reminder} />);
+  return reminders?.map((reminder) => (
+    <ReminderItem reminder={reminder} key={reminder.id} />
+  ));
 }
 
 function SkeletonReminderItem() {

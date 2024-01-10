@@ -11,6 +11,9 @@ import Footer from "@/components/footer";
 export const metadata: Metadata = {
   title: "TODO PRO",
   description: "Developed by @officialmafra",
+  icons: {
+    icon: "/assets/logo.svg",
+  },
 };
 
 export default function RootLayout({

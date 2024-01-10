@@ -55,7 +55,7 @@ const DrawerDialog = ({
               <Icon size={16} />
             </Button>
           ) : (
-            <Button className="gap-2 font-semibold uppercase">
+            <Button size={"sm"} className="gap-2 font-semibold uppercase">
               new <Plus size={16} strokeWidth={3} />
             </Button>
           )}
@@ -85,7 +85,7 @@ const DrawerDialog = ({
             <Icon size={16} />
           </Button>
         ) : (
-          <Button className="gap-2 font-semibold uppercase">
+          <Button size={"sm"} className="gap-2 font-semibold uppercase">
             new <Plus size={16} strokeWidth={3} />
           </Button>
         )}

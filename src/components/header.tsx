@@ -30,9 +30,9 @@ const Header = () => {
 
   return (
     <header className="flex flex-col pb-5 pt-10 md:pb-8 md:pt-12">
-      <nav className="container flex items-center justify-center">
+      <nav className="container flex items-center justify-center gap-4">
         {user && isLoaded ? (
-          <div className="fle-row flex items-center gap-2">
+          <div className="flex flex-row items-center gap-2">
             <UserButton
               afterSignOutUrl="/"
               appearance={{
@@ -42,11 +42,11 @@ const Header = () => {
               }}
             />
 
-            <div className="flex flex-col">
-              <h1 className="max-w-[200px] truncate text-lg font-semibold tracking-tight md:text-xl">
+            <div className="flex max-w-[150px] flex-col md:max-w-none">
+              <h1 className="truncate text-lg font-semibold tracking-tight md:text-xl">
                 {user.fullName}
               </h1>
-              <span className="text-xs text-muted-foreground md:text-sm">
+              <span className="truncate text-xs text-muted-foreground md:text-sm">
                 {user.emailAddresses[0].emailAddress}
               </span>
             </div>

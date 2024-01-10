@@ -9,7 +9,7 @@ import { Toaster } from "@/components/ui/sonner";
 import Footer from "@/components/footer";
 
 export const metadata: Metadata = {
-  title: "To-do PRO",
+  title: "TODO PRO",
   description: "Developed by @officialmafra",
 };
 

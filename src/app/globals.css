@@ -73,7 +73,6 @@
 
 .marquee {
   white-space: nowrap;
-  overflow: hidden;
   animation: marquee 15s linear infinite;
 }
 

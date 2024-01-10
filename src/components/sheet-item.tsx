@@ -47,9 +47,7 @@ const SheetItem = ({
     <div key={id} className="flex flex-col">
       <div className="flex justify-between">
         <div className="space-y-1">
-          <h1 className="truncate font-geist_mono text-xl uppercase">
-            {title}
-          </h1>
+          <h1 className="font-geist_mono uppercase lg:text-xl">{title}</h1>
           <p className="line-clamp-3 text-white/90">{description}</p>
         </div>
 

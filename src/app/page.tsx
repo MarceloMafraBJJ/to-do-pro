@@ -14,6 +14,7 @@ import Subtitle from "@/components/subtitle ";
 import CompletedRemindersCard from "@/components/completed-reminders-card";
 import { Reminder } from "@prisma/client";
 import FrequencyItemsWrapper from "@/components/frequency-items-wrapper";
+import ReminderItemsWrapper from "@/components/reminder-items-wrapper";
 
 const Home = () => {
   function getFormattedDateWithDayOfWeek() {
@@ -115,9 +116,7 @@ async function ReminderItems() {
     );
   }
 
-  return reminders?.map((reminder) => (
-    <ReminderItem reminder={reminder} key={reminder.id} />
-  ));
+  return <ReminderItemsWrapper reminders={reminders} />;
 }
 
 function SkeletonReminderItem() {

@@ -29,7 +29,7 @@ const ReminderItem = ({ reminder }: { reminder: Reminder }) => {
     >
       <div className="flex space-x-3">
         <Checkbox
-          id="term"
+          id={`term-${reminder.id}`}
           checked={reminder.completed}
           onClick={handleCheckReminder}
         />
@@ -37,7 +37,7 @@ const ReminderItem = ({ reminder }: { reminder: Reminder }) => {
         <div className="grid gap-1.5 leading-none">
           {reminder.title && (
             <label
-              htmlFor="term"
+              htmlFor={`term-${reminder.id}`}
               className={`cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${
                 reminder.completed && "text-primary"
               }`}
